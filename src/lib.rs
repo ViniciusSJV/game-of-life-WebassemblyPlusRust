@@ -165,6 +165,51 @@ impl Universe {
 			}
 		}	
 	}
+	
+	pub fn create_glider(&mut self, row: u32, col: u32) {
+		let idx1 = self.get_index(row, col);
+		let idx2 = self.get_index(row, col + 1);
+		let idx3 = self.get_index(row, col + 2);
+		
+		self.cells[idx1] = Cell::Alive; 
+		self.cells[idx2] = Cell::Alive; 
+		self.cells[idx3] = Cell::Alive; 
+	}
+	
+	pub fn create_pulsar_gerator(&mut self, row: u32, col: u32) {
+		let idxCenterPulsar = self.get_index(row, col);
+		self.cells[idxCenterPulsar] = Cell::Dead; 
+		
+		let mut index = self.get_index(row - 2, col);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row + 2, col);
+		self.cells[index] = Cell::Alive;
+		
+		index = self.get_index(row + 1, col);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row - 1, col);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row, col + 1);
+		self.cells[index] = Cell::Alive;
+		
+		index = self.get_index(row, col - 1);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row + 1, col + 1);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row + 1, col - 1);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row - 1, col + 1);
+		self.cells[index] = Cell::Alive; 
+		
+		index = self.get_index(row - 1, col - 1);
+		self.cells[index] = Cell::Alive; 
+	}
 }
 
 impl Cell {
