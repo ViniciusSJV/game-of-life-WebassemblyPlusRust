@@ -58,8 +58,8 @@ impl Universe {
 	pub fn new() -> Universe {
 		//utils::set_panic_hook();
 		
-        let width = 80;
-        let height = 80;
+        let width = 128;
+        let height = 128;
 
         let cells = (0..width * height)
             .map(|_i| {
@@ -97,7 +97,7 @@ impl Universe {
     }
 	
     pub fn tick(&mut self, range: u32) {
-		//let _timer = Timer::new("Universe::tick");
+		let _timer = Timer::new("Universe::tick");
 		
         let mut next = self.cells.clone();
 
