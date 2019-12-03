@@ -96,46 +96,69 @@ impl Universe {
         self.to_string()
     }
 	
-    pub fn tick(&mut self, range: u32) {
+	pub fn tick(&mut self, range: u32) {
 		let _timer = Timer::new("Universe::tick");
-		
-        let mut next = self.cells.clone();
 
-        for row in range..self.height {
-            for col in range..self.width {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let live_neighbors = self.live_neighbor_count(row, col);
+		let mut next = {
+			let _timer = Timer::new("allocate next cells");
+			self.cells.clone()
+		};
 
-                let next_cell = match (cell, live_neighbors) {
-                    // Rule 1: Any live cell with fewer than two live neighbours
-                    // dies, as if caused by underpopulation.
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    // Rule 2: Any live cell with two or three live neighbours
-                    // lives on to the next generation.
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    // Rule 3: Any live cell with more than three live
-                    // neighbours dies, as if by overpopulation.
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    // Rule 4: Any dead cell with exactly three live neighbours
-                    // becomes a live cell, as if by reproduction.
-                    (Cell::Dead, 3) => Cell::Alive,
-                    // All other cells remain in the same state.
-                    (otherwise, _) => otherwise,
-                };
-				
-				//log!("    Celula {:?}: Linha: {:?} - Coluna: {:?}", if next_cell == Cell::Dead { "morta" } else { "viva" }, row, col);
+		{
+			let _timer = Timer::new("new generation");
+			for row in range..self.height {
+				for col in range..self.width {
+					let idx = self.get_index(row, col);
+					let cell = self.cells[idx];
+					let live_neighbors = self.live_neighbor_count(row, col);
 
-                next[idx] = next_cell;
-            }
-        }
+					let next_cell = match (cell, live_neighbors) {
+						// Rule 1: Any live cell with fewer than two live neighbours
+						// dies, as if caused by underpopulation.
+						(Cell::Alive, x) if x < 2 => Cell::Dead,
+						// Rule 2: Any live cell with two or three live neighbours
+						// lives on to the next generation.
+						(Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+						// Rule 3: Any live cell with more than three live
+						// neighbours dies, as if by overpopulation.
+						(Cell::Alive, x) if x > 3 => Cell::Dead,
+						// Rule 4: Any dead cell with exactly three live neighbours
+						// becomes a live cell, as if by reproduction.
+						(Cell::Dead, 3) => Cell::Alive,
+						// All other cells remain in the same state.
+						(otherwise, _) => otherwise,
+					};
 
-        self.cells = next;
-    }
+					next[idx] = next_cell;
+				}
+			}
+		}
+
+		let _timer = Timer::new("free old cells");
+		self.cells = next;
+	}
 	
 	fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
+        let (_row_normalize, _column_normalize) = self.normalize_coordinate(row, column);
+		(_row_normalize * self.width + _column_normalize) as usize
     }
+	
+	fn normalize_coordinate(&self, mut row: u32, mut col: u32) -> (u32, u32) {
+		
+		if row < 0 {
+			row = self.height - 1;
+		} else if row > self.height - 1{
+			row = 0;
+		};
+		
+		if col < 0 {
+			col = self.width - 1;
+		} else if col > self.width - 1 {
+			col = 0;
+		};
+		
+		(row, col)
+	}
 	
 	fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
@@ -235,8 +258,8 @@ impl Universe {
 	}
 	
 	pub fn create_pulsar_gerator(&mut self, row: u32, col: u32) {
-		let idxCenterPulsar = self.get_index(row, col);
-		self.cells[idxCenterPulsar] = Cell::Dead; 
+		let idx_center_pulsar = self.get_index(row, col);
+		self.cells[idx_center_pulsar] = Cell::Dead; 
 		
 		let mut index = self.get_index(row - 2, col);
 		self.cells[index] = Cell::Alive; 
